@@ -134,12 +134,16 @@ JS;
                     }
                     break;
                 case '错误':
-                    $msg    = str_replace("\n", '\n', addslashes(is_scalar($m) ? $m : json_encode($m)));
+                    $msg    = str_replace("\n", '\n', addslashes(is_scalar($m) ? (string)$m : json_encode($m['msg'])));
                     $style  = 'color:#F4006B;font-size:14px;';
                     $line[] = "console.error(\"%c{$msg}\", \"{$style}\");";
                     break;
                 case 'sql':
-                    $msg    = str_replace("\n", '\n', addslashes($m));
+                    if(is_array($m)){
+                        $msg    = str_replace("\n", '\n', addslashes($m['sql']. $m['info'].PHP_EOL.$m['file'].':'.$m['line']));
+                    }else{
+                        $msg    = str_replace("\n", '\n', addslashes($m));
+                    }
                     $style  = "color:#009bb4;";
                     $line[] = "console.log(\"%c{$msg}\", \"{$style}\");";
                     break;
@@ -163,9 +167,19 @@ JS;
     {
         $files = get_included_files();
         $info  = [];
-
+        $handle = app('think\exception\Handle');
+        $isWin = $handle->isWin();
         foreach ($files as $key => $file) {
-            $info[] = $file . ' ( ' . number_format(filesize($file) / 1024, 2) . ' KB )';
+            $filesize = filesize($file);
+            $filePath = $file;
+            if ($isWin && stripos($filePath, '/mnt') !== false) {
+                $filePath = str_replace('/mnt/', '', $filePath);
+                $filePathArr = explode('/', $filePath);
+                $filePathArr[0] .= ':';
+                $filePath = implode('/', $filePathArr);
+                $file = $filePath;
+            }
+            $info[] = $file. ' ( ' . number_format($filesize / 1024, 2) . ' KB )';
         }
 
         return $info;

@@ -1,16 +1,25 @@
 {
-    "name": "topthink/think-trace",
+    "name": "yangweijie/think-trace",
     "description": "thinkphp debug trace",
     "license": "Apache-2.0",
     "authors": [
         {
             "name": "liu21st",
             "email": "liu21st@gmail.com"
+        },
+        {
+            "name": "yangweijie",
+            "email": "917647288@qq.com"
         }
     ],
     "require": {
-    	"php": ">=7.1.0",
-        "topthink/framework": "^6.0|^8.0"
+    	"php": ">=7.4.0",
+        "symfony/polyfill-php80": "^1.16",
+        "topthink/framework": "^6.0|^8.0",
+        "yangweijie/think-exception": "^1.0.6"
+    },
+    "conflict": {
+        "topthink/think-trace": "*"
     },
     "autoload": {
         "psr-4": {

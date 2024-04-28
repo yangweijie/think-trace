@@ -1,22 +1,9 @@
 <?php
-// +----------------------------------------------------------------------
-// | ThinkPHP [ WE CAN DO IT JUST THINK IT ]
-// +----------------------------------------------------------------------
-// | Copyright (c) 2006-2016 http://thinkphp.cn All rights reserved.
-// +----------------------------------------------------------------------
-// | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
-// +----------------------------------------------------------------------
-// | Author: liu21st <liu21st@gmail.com>
-// +----------------------------------------------------------------------
-declare (strict_types = 1);
+
 namespace think\trace;
 
 use think\App;
 use think\Response;
-
-/**
- * 页面Trace调试
- */
 class Html
 {
     protected $config = [
@@ -116,9 +103,19 @@ class Html
     {
         $files = get_included_files();
         $info  = [];
-
+        $handle = app('think\exception\Handle');
+        $isWin = $handle->isWin();
         foreach ($files as $key => $file) {
-            $info[] = $file . ' ( ' . number_format(filesize($file) / 1024, 2) . ' KB )';
+            $filesize = filesize($file);
+            $filePath = $file;
+            if ($isWin && stripos($filePath, '/mnt') !== false) {
+                $filePath = str_replace('/mnt/', '', $filePath);
+                $filePathArr = explode('/', $filePath);
+                $filePathArr[0] .= ':';
+                $filePath = implode('/', $filePathArr);
+                $file = $filePath;
+            }
+            $info[] = '<a href="'.$handle->getEditorHref($file, 0).'">'.$file.'</a>'. ' ( ' . number_format($filesize / 1024, 2) . ' KB )';
         }
 
         return $info;

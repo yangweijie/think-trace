@@ -4,6 +4,7 @@ namespace think\trace;
 
 use think\App;
 use think\Response;
+use yangweijie\editor\Editor;
 class Html
 {
     protected $config = [
@@ -103,19 +104,11 @@ class Html
     {
         $files = get_included_files();
         $info  = [];
-        $handle = app('think\exception\Handle');
-        $isWin = $handle->isWin();
+        $isWin = Editor::isWin();
         foreach ($files as $key => $file) {
             $filesize = filesize($file);
-            $filePath = $file;
-            if ($isWin && stripos($filePath, '/mnt') !== false) {
-                $filePath = str_replace('/mnt/', '', $filePath);
-                $filePathArr = explode('/', $filePath);
-                $filePathArr[0] .= ':';
-                $filePath = implode('/', $filePathArr);
-                $file = $filePath;
-            }
-            $info[] = '<a href="'.$handle->getEditorHref($file, 0).'">'.$file.'</a>'. ' ( ' . number_format($filesize / 1024, 2) . ' KB )';
+            $file = Editor::wslToRealWin($file);
+            $info[] = '<a href="'.Editor::getEditorHref($file, 0).'">'.$file.'</a>'. ' ( ' . number_format($filesize / 1024, 2) . ' KB )';
         }
 
         return $info;

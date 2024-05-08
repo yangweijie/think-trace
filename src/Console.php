@@ -13,6 +13,7 @@ namespace think\trace;
 
 use think\App;
 use think\Response;
+use yangweijie\editor\Editor;
 
 /**
  * 浏览器调试输出
@@ -140,12 +141,17 @@ JS;
                     break;
                 case 'sql':
                     if(is_array($m)){
-                        $msg    = str_replace("\n", '\n', addslashes($m['sql']. $m['info'].PHP_EOL.$m['file'].':'.$m['line']));
+                        $msg    = str_replace("\n", '\n', addslashes($m['sql']. $m['info']));
+                        $style  = "color:#009bb4;";
+                        $line[] = "console.log(\"%c{$msg}\", \"{$style}\");";
+                        if(isset($m['jump']) && $m['jump']){
+                            $line[] = "console.log(\"%c{$m['jump']}\", \"{$style}\");";
+                        }
                     }else{
                         $msg    = str_replace("\n", '\n', addslashes($m));
+                        $style  = "color:#009bb4;";
+                        $line[] = "console.log(\"%c{$msg}\", \"{$style}\");";
                     }
-                    $style  = "color:#009bb4;";
-                    $line[] = "console.log(\"%c{$msg}\", \"{$style}\");";
                     break;
                 default:
                     $m      = is_string($key) ? $key . ' ' . $m : $key + 1 . ' ' . $m;
@@ -167,19 +173,10 @@ JS;
     {
         $files = get_included_files();
         $info  = [];
-        $handle = app('think\exception\Handle');
-        $isWin = $handle->isWin();
         foreach ($files as $key => $file) {
             $filesize = filesize($file);
-            $filePath = $file;
-            if ($isWin && stripos($filePath, '/mnt') !== false) {
-                $filePath = str_replace('/mnt/', '', $filePath);
-                $filePathArr = explode('/', $filePath);
-                $filePathArr[0] .= ':';
-                $filePath = implode('/', $filePathArr);
-                $file = $filePath;
-            }
-            $info[] = $file. ' ( ' . number_format($filesize / 1024, 2) . ' KB )';
+            $file = Editor::wslToRealWin($file);
+            $info[] = Editor::getEditorHref($file, 0). ' ( ' . number_format($filesize / 1024, 2) . ' KB )';
         }
 
         return $info;

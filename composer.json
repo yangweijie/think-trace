@@ -16,7 +16,7 @@
     	"php": ">=7.4.0",
         "symfony/polyfill-php80": "^1.16",
         "topthink/framework": "^6.0 | ^6.1 |^8.0",
-        "yangweijie/think-exception": "^1.0.6"
+        "yangweijie/think-editor": "*"
     },
     "conflict": {
         "topthink/think-trace": "*"

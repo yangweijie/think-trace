@@ -12,6 +12,7 @@ namespace think\trace;
 
 use think\facade\Db;
 use think\Service as BaseService;
+use yangweijie\editor\Editor;
 
 class Service extends BaseService
 {
@@ -37,20 +38,12 @@ class Service extends BaseService
                 $master = '';
             }
             $current = [];
-            $handle = app('think\exception\Handle');
             if(!str_contains($sql, 'CONNECT') && !str_contains($sql, 'FULL COLUMNS')) {
                 $stack = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 20);
                 foreach ($stack as $k => $v) {
                     if(isset($v['file']) && !str_contains($v['file'], 'vendor')){
                         $current = $v;
-                        $filePath = $v['file'];
-                        if ($handle->isWin() && stripos($filePath, '/mnt') !== false) {
-                            $filePath = str_replace('/mnt/', '', $filePath);
-                            $filePathArr = explode('/', $filePath);
-                            $filePathArr[0] .= ':';
-                            $filePath = implode('/', $filePathArr);
-                            $current['file'] = $filePath;
-                        }
+                        $current['file'] = Editor::wslToRealWin($current['file']);
                         break;
                     }
                 }
@@ -60,7 +53,7 @@ class Service extends BaseService
                 'info'=> ' [ ' . $master . 'RunTime:' . $time . 's ]',
                 'file'=>$current['file']??'',
                 'line'=>$current['line']??'',
-                'jump'=> $current? $handle->getEditorHref($current['file'], $current['line']):'',
+                'jump'=> $current? Editor::getEditorHref($current['file'], $current['line']):'',
             ], 'sql');
         });
     }
